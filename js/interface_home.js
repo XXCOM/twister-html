@@ -72,6 +72,8 @@ var InterfaceFunctions = function()
         }
         else
         {
+            loadBlacklist();
+
             $miniProfile.find("a.mini-profile-name").attr("href",$.MAL.userUrl(defaultScreenName));
             $miniProfile.find("a.open-profile-modal").attr("href",$.MAL.userUrl(defaultScreenName));
             $miniProfile.find(".mini-profile-name").text(defaultScreenName);

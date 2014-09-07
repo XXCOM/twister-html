@@ -6,7 +6,10 @@
 function requestDMsnippetList(dmThreadList) {
     var followList = [];
     for( var i = 0; i < followingUsers.length; i++ ) {
-        followList.push({username:followingUsers[i]});
+        var username = followingUsers[i];
+        if ( !(username in blacklistUsers) ) {
+            followList.push({username:followingUsers[i]});
+        }
     }
 
     twisterRpc("getdirectmsgs", [defaultScreenName, 1, followList],

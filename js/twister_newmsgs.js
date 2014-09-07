@@ -15,8 +15,13 @@ var PURGE_OLD_MENTIONS_TIMEOUT = 3600 * 24 * 30; // one month
 function processMention(user, mentionTime, data) {
     var key = user + ";" + mentionTime;
     var curTime = new Date().getTime() / 1000;
-    if( mentionTime > curTime + 3600 * 2 ) {
-        console.log("mention from the future will be ignored");
+    if( blacklistUsers.indexOf(user) >= 0 || mentionTime > curTime + 3600 * 2 ) {
+        console.log("mention from the blacklistUsers and future will be ignored - " + user);
+
+        if (key in _knownMentions) {
+          delete _knownMentions[key];
+          resetMentionsCount();
+        }
     } else {
         var newMentionsUpdated = false;
         if( !(key in _knownMentions) ) {
@@ -95,7 +100,8 @@ function initMentionsCount() {
 function getMentionsData() {
     mentions = []
     for( var key in _knownMentions ) {
-        if( _knownMentions.hasOwnProperty(key) && _knownMentions[key].data ) {
+
+        if( blacklistUsers.indexOf(key) < 0 && _knownMentions.hasOwnProperty(key) && _knownMentions[key].data ) {
             mentions.push(_knownMentions[key].data);
         }
     }
@@ -131,7 +137,7 @@ function requestDMsCount() {
            function(req, dmUsers) {
                var updated = false;
                for( var u in dmUsers ) {
-                   if( dmUsers.hasOwnProperty(u) ) {
+                   if( dmUsers.hasOwnProperty(u) && blacklistUsers.indexOf(u) < 0 ) {
                        var dmData = dmUsers[u][0];
                        if( (u in _lastDMIdPerUser) && (u in _newDMsPerUser) ) {
                            if( dmData.id != _lastDMIdPerUser[u] ) {
@@ -157,7 +163,7 @@ function getNewDMsCount() {
     var newDMs = 0;
 
     for( var key in _newDMsPerUser ) {
-        if( _newDMsPerUser.hasOwnProperty(key) ) {
+        if( _newDMsPerUser.hasOwnProperty(key) && blacklistUsers.indexOf(key) < 0 ) {
             newDMs += _newDMsPerUser[key];
         }
     }

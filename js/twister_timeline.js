@@ -218,10 +218,18 @@ function requestTimelineUpdate(mode, count, timelineUsers, getspam)
 {
     if( _refreshInProgress || !defaultScreenName)
         return;
+
+    var userlist = [];
+    for (var i = timelineUsers.length - 1; i >= 0; i--) {
+        if ( blacklistUsers.indexOf(timelineUsers[i]) < 0 ) {
+            userlist.push(timelineUsers[i]);
+        }
+    }
+
     $.MAL.postboardLoading();
     _refreshInProgress = true;
-    if( timelineUsers.length ) {
-        var req = new requestObj(timelineUsers, mode, count, getspam);
+    if( userlist.length ) {
+        var req = new requestObj(userlist, mode, count, getspam);
         requestGetposts(req);
     } else {
         console.log("requestTimelineUpdate: not following any users");
@@ -247,7 +255,7 @@ function processLastHave(userHaves)
     var reqConfirmNewPosts = [];
     var newPostsLocal = 0;
     for( var user in userHaves ) {
-        if( userHaves.hasOwnProperty(user) ) {
+        if( userHaves.hasOwnProperty(user) && !(user in blacklistUsers) ) {
             // checks for _idTrackerMap as well. the reason is that getlasthave
             // returns all users we follow, but the current timeline might be
             // for just a single user.
